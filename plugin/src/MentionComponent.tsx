@@ -266,7 +266,7 @@ export default function BeautifulMentionComponent(
         data-beautiful-mention={mention}
       >
         <span className={classNames.trigger}>{trigger}</span>
-        <span className={classNames.value}>{value}</span>
+        <span className={classNames.value}>{data?.mentionLabel ?? value}</span>
       </span>
     );
   }
