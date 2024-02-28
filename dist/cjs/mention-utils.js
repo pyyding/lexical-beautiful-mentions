@@ -2,12 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.$selectEnd = exports.getMenuItemLimitProp = exports.getCreatableProp = exports.getPreviousSibling = exports.getNextSibling = exports.$getSelectionInfo = exports.isWordChar = exports.LENGTH_LIMIT = exports.VALID_CHARS = exports.TRIGGERS = exports.DEFAULT_PUNCTUATION = void 0;
 const lexical_1 = require("lexical");
-exports.DEFAULT_PUNCTUATION = "\\.,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\/!%'\"~=<>_:;";
+exports.DEFAULT_PUNCTUATION = "\\,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\!%'\"~=<>_:;";
 // Strings that can trigger the mention menu.
 const TRIGGERS = (triggers) => "(?:" + triggers.join("|") + ")";
 exports.TRIGGERS = TRIGGERS;
 // Chars we expect to see in a mention (non-space, non-punctuation).
-const VALID_CHARS = (triggers, punctuation) => "(?!" + triggers.join("|") + ")[^\\s" + punctuation + "]";
+const VALID_CHARS = (triggers, punctuation) => "[^\\s" + punctuation + "]";
 exports.VALID_CHARS = VALID_CHARS;
 exports.LENGTH_LIMIT = 75;
 function isWordChar(char, triggers, punctuation) {

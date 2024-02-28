@@ -1,6 +1,6 @@
 import { LexicalNode } from "lexical";
 import { BeautifulMentionsPluginProps } from "./BeautifulMentionsPluginProps";
-export declare const DEFAULT_PUNCTUATION = "\\.,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\/!%'\"~=<>_:;";
+export declare const DEFAULT_PUNCTUATION = "\\,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\!%'\"~=<>_:;";
 export declare const TRIGGERS: (triggers: string[]) => string;
 export declare const VALID_CHARS: (triggers: string[], punctuation: string) => string;
 export declare const LENGTH_LIMIT = 75;

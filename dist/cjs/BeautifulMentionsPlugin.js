@@ -50,6 +50,7 @@ const mention_commands_1 = require("./mention-commands");
 const mention_utils_1 = require("./mention-utils");
 const useIsFocused_1 = require("./useIsFocused");
 const useMentionLookupService_1 = require("./useMentionLookupService");
+const config_1 = require("./config");
 class MentionOption extends Menu_1.MenuOption {
     constructor(
     /**
@@ -78,7 +79,7 @@ const VALID_JOINS = (punctuation) => "(?:" +
 // Regex used to trigger the mention menu.
 function createMentionsRegex(triggers, punctuation, allowSpaces) {
     return new RegExp("(^|\\s|\\()(" +
-        (0, mention_utils_1.TRIGGERS)(triggers) +
+        "(?:" + config_1.regexes.join("|") + ")" +
         "((?:" +
         (0, mention_utils_1.VALID_CHARS)(triggers, punctuation) +
         (allowSpaces ? VALID_JOINS(punctuation) : "") +
@@ -88,17 +89,18 @@ function createMentionsRegex(triggers, punctuation, allowSpaces) {
         ")$");
 }
 function checkForMentions(text, triggers, punctuation, allowSpaces) {
+    var _a;
     const match = createMentionsRegex(triggers, punctuation, allowSpaces).exec(text);
     if (match !== null) {
         // The strategy ignores leading whitespace, but we need to know its
         // length to add it to the leadOffset
         const maybeLeadingWhitespace = match[1];
         const matchingStringWithTrigger = match[2];
-        const matchingString = match[3];
+        const matchingString = (_a = match[4]) !== null && _a !== void 0 ? _a : match[match.length - 1];
         if (matchingStringWithTrigger.length >= 1) {
             return {
                 leadOffset: match.index + maybeLeadingWhitespace.length,
-                matchingString: matchingString,
+                matchingString: matchingString !== null && matchingString !== void 0 ? matchingString : '',
                 replaceableString: matchingStringWithTrigger,
             };
         }
@@ -202,7 +204,13 @@ function BeautifulMentionsPlugin(props) {
                 ? // if the value has spaces, wrap it in the enclosure
                     mentionEnclosure + selectedOption.value + mentionEnclosure
                 : selectedOption.value;
-            const mentionNode = (0, MentionNode_1.$createBeautifulMentionNode)(trigger, value, selectedOption.data);
+            /**
+             * todo: gigahack #2. the space logic should come from each trigger prop logic separately 🤡
+             */
+            const hasLastIndexAsSpace = trigger.lastIndexOf(" ") === trigger.length - 1;
+            const isNoSpaceTrigger = trigger.includes("#");
+            const parsedTrigger = isNoSpaceTrigger || hasLastIndexAsSpace ? trigger : `${trigger} `;
+            const mentionNode = (0, MentionNode_1.$createBeautifulMentionNode)(parsedTrigger, value, selectedOption.data);
             if (nodeToReplace) {
                 nodeToReplace.replace(mentionNode);
             }

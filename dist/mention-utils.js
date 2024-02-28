@@ -1,9 +1,9 @@
 import { $createRangeSelection, $getRoot, $getSelection, $isDecoratorNode, $isElementNode, $isRangeSelection, $isTextNode, $setSelection, } from "lexical";
-export const DEFAULT_PUNCTUATION = "\\.,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\/!%'\"~=<>_:;";
+export const DEFAULT_PUNCTUATION = "\\,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\!%'\"~=<>_:;";
 // Strings that can trigger the mention menu.
 export const TRIGGERS = (triggers) => "(?:" + triggers.join("|") + ")";
 // Chars we expect to see in a mention (non-space, non-punctuation).
-export const VALID_CHARS = (triggers, punctuation) => "(?!" + triggers.join("|") + ")[^\\s" + punctuation + "]";
+export const VALID_CHARS = (triggers, punctuation) => "[^\\s" + punctuation + "]";
 export const LENGTH_LIMIT = 75;
 export function isWordChar(char, triggers, punctuation) {
     return new RegExp(VALID_CHARS(triggers, punctuation)).test(char);

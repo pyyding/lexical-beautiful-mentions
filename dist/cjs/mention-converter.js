@@ -4,8 +4,9 @@ exports.$convertToMentionNodes = exports.convertToMentionEntries = void 0;
 const lexical_1 = require("lexical");
 const MentionNode_1 = require("./MentionNode");
 const mention_utils_1 = require("./mention-utils");
+const config_1 = require("./config");
 function findMentions(text, triggers, punctuation) {
-    const regex = new RegExp((0, mention_utils_1.TRIGGERS)(triggers) +
+    const regex = new RegExp("(?:" + config_1.regexes.join("|") + ")" +
         "((?:" +
         (0, mention_utils_1.VALID_CHARS)(triggers, punctuation) +
         "){1," +

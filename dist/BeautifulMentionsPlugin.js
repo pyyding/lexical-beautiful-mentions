@@ -21,9 +21,10 @@ import { MenuOption } from "./Menu";
 import { TypeaheadMenuPlugin } from "./TypeaheadMenuPlugin";
 import { CAN_USE_DOM, IS_MOBILE } from "./environment";
 import { $insertMentionAtSelection, $insertTriggerAtSelection, $removeMention, $renameMention, INSERT_MENTION_COMMAND, OPEN_MENTION_MENU_COMMAND, REMOVE_MENTIONS_COMMAND, RENAME_MENTIONS_COMMAND, } from "./mention-commands";
-import { $getSelectionInfo, $selectEnd, DEFAULT_PUNCTUATION, LENGTH_LIMIT, TRIGGERS, VALID_CHARS, getCreatableProp, getMenuItemLimitProp, isWordChar, } from "./mention-utils";
+import { $getSelectionInfo, $selectEnd, DEFAULT_PUNCTUATION, LENGTH_LIMIT, VALID_CHARS, getCreatableProp, getMenuItemLimitProp, isWordChar, } from "./mention-utils";
 import { useIsFocused } from "./useIsFocused";
 import { useMentionLookupService } from "./useMentionLookupService";
+import { regexes } from './config';
 class MentionOption extends MenuOption {
     constructor(
     /**
@@ -52,7 +53,7 @@ const VALID_JOINS = (punctuation) => "(?:" +
 // Regex used to trigger the mention menu.
 function createMentionsRegex(triggers, punctuation, allowSpaces) {
     return new RegExp("(^|\\s|\\()(" +
-        TRIGGERS(triggers) +
+        "(?:" + regexes.join("|") + ")" +
         "((?:" +
         VALID_CHARS(triggers, punctuation) +
         (allowSpaces ? VALID_JOINS(punctuation) : "") +
@@ -62,17 +63,18 @@ function createMentionsRegex(triggers, punctuation, allowSpaces) {
         ")$");
 }
 export function checkForMentions(text, triggers, punctuation, allowSpaces) {
+    var _a;
     const match = createMentionsRegex(triggers, punctuation, allowSpaces).exec(text);
     if (match !== null) {
         // The strategy ignores leading whitespace, but we need to know its
         // length to add it to the leadOffset
         const maybeLeadingWhitespace = match[1];
         const matchingStringWithTrigger = match[2];
-        const matchingString = match[3];
+        const matchingString = (_a = match[4]) !== null && _a !== void 0 ? _a : match[match.length - 1];
         if (matchingStringWithTrigger.length >= 1) {
             return {
                 leadOffset: match.index + maybeLeadingWhitespace.length,
-                matchingString: matchingString,
+                matchingString: matchingString !== null && matchingString !== void 0 ? matchingString : '',
                 replaceableString: matchingStringWithTrigger,
             };
         }
@@ -175,7 +177,13 @@ export function BeautifulMentionsPlugin(props) {
                 ? // if the value has spaces, wrap it in the enclosure
                     mentionEnclosure + selectedOption.value + mentionEnclosure
                 : selectedOption.value;
-            const mentionNode = $createBeautifulMentionNode(trigger, value, selectedOption.data);
+            /**
+             * todo: gigahack #2. the space logic should come from each trigger prop logic separately 🤡
+             */
+            const hasLastIndexAsSpace = trigger.lastIndexOf(" ") === trigger.length - 1;
+            const isNoSpaceTrigger = trigger.includes("#");
+            const parsedTrigger = isNoSpaceTrigger || hasLastIndexAsSpace ? trigger : `${trigger} `;
+            const mentionNode = $createBeautifulMentionNode(parsedTrigger, value, selectedOption.data);
             if (nodeToReplace) {
                 nodeToReplace.replace(mentionNode);
             }

@@ -1,8 +1,9 @@
 import { $createTextNode } from "lexical";
 import { $createBeautifulMentionNode } from "./MentionNode";
-import { DEFAULT_PUNCTUATION, LENGTH_LIMIT, TRIGGERS, VALID_CHARS, } from "./mention-utils";
+import { DEFAULT_PUNCTUATION, LENGTH_LIMIT, VALID_CHARS, } from "./mention-utils";
+import { regexes } from "./config";
 function findMentions(text, triggers, punctuation) {
-    const regex = new RegExp(TRIGGERS(triggers) +
+    const regex = new RegExp("(?:" + regexes.join("|") + ")" +
         "((?:" +
         VALID_CHARS(triggers, punctuation) +
         "){1," +
