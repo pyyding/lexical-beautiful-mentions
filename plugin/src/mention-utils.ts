@@ -13,7 +13,7 @@ import {
 import { BeautifulMentionsPluginProps } from "./BeautifulMentionsPluginProps";
 
 export const DEFAULT_PUNCTUATION =
-  "\\.,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\/!%'\"~=<>_:;";
+    "\\,\\*\\?\\$\\|#{}\\(\\)\\^\\[\\]\\\\!%'\"~=<>_:;";
 
 // Strings that can trigger the mention menu.
 export const TRIGGERS = (triggers: string[]) =>
@@ -21,7 +21,7 @@ export const TRIGGERS = (triggers: string[]) =>
 
 // Chars we expect to see in a mention (non-space, non-punctuation).
 export const VALID_CHARS = (triggers: string[], punctuation: string) =>
-  "(?!" + triggers.join("|") + ")[^\\s" + punctuation + "]";
+    "[^\\s" + punctuation + "]";
 
 export const LENGTH_LIMIT = 75;
 

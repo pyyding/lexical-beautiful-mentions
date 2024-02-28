@@ -52,7 +52,6 @@ import {
   $selectEnd,
   DEFAULT_PUNCTUATION,
   LENGTH_LIMIT,
-  TRIGGERS,
   VALID_CHARS,
   getCreatableProp,
   getMenuItemLimitProp,
@@ -60,6 +59,7 @@ import {
 } from "./mention-utils";
 import { useIsFocused } from "./useIsFocused";
 import { useMentionLookupService } from "./useMentionLookupService";
+import { regexes } from './config';
 
 class MentionOption extends MenuOption {
   readonly menuItem: BeautifulMentionsMenuItem;
@@ -101,7 +101,7 @@ function createMentionsRegex(
 ) {
   return new RegExp(
     "(^|\\s|\\()(" +
-      TRIGGERS(triggers) +
+      "(?:" + regexes.join("|") + ")" +
       "((?:" +
       VALID_CHARS(triggers, punctuation) +
       (allowSpaces ? VALID_JOINS(punctuation) : "") +
@@ -126,11 +126,11 @@ export function checkForMentions(
     // length to add it to the leadOffset
     const maybeLeadingWhitespace = match[1];
     const matchingStringWithTrigger = match[2];
-    const matchingString = match[3];
+    const matchingString = match[4] ?? match[match.length - 1];
     if (matchingStringWithTrigger.length >= 1) {
       return {
         leadOffset: match.index + maybeLeadingWhitespace.length,
-        matchingString: matchingString,
+        matchingString: matchingString ?? '',
         replaceableString: matchingStringWithTrigger,
       };
     }
@@ -269,10 +269,20 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
             ? // if the value has spaces, wrap it in the enclosure
               mentionEnclosure + selectedOption.value + mentionEnclosure
             : selectedOption.value;
+
+
+        /**
+         * todo: gigahack #2. the space logic should come from each trigger prop logic separately 🤡
+         */
+        const hasLastIndexAsSpace =
+            trigger.lastIndexOf(" ") === trigger.length - 1;
+        const isNoSpaceTrigger = trigger.includes("#");
+        const parsedTrigger =
+            isNoSpaceTrigger || hasLastIndexAsSpace ? trigger : `${trigger} `;
         const mentionNode = $createBeautifulMentionNode(
-          trigger,
-          value,
-          selectedOption.data,
+            parsedTrigger,
+            value,
+            selectedOption.data
         );
         if (nodeToReplace) {
           nodeToReplace.replace(mentionNode);

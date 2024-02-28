@@ -3,9 +3,9 @@ import { $createBeautifulMentionNode } from "./MentionNode";
 import {
   DEFAULT_PUNCTUATION,
   LENGTH_LIMIT,
-  TRIGGERS,
   VALID_CHARS,
 } from "./mention-utils";
+import { regexes } from "./config";
 
 interface MentionEntry {
   type: "mention";
@@ -22,7 +22,7 @@ type Entry = MentionEntry | TextEntry;
 
 function findMentions(text: string, triggers: string[], punctuation: string) {
   const regex = new RegExp(
-    TRIGGERS(triggers) +
+      "(?:" + regexes.join("|") + ")" +
       "((?:" +
       VALID_CHARS(triggers, punctuation) +
       "){1," +
