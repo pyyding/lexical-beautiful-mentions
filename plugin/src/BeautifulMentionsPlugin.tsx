@@ -57,6 +57,7 @@ import {
   getCreatableProp,
   getMenuItemLimitProp,
   getTextContent,
+  getTriggerRegExp,
   isWordChar,
 } from "./mention-utils";
 import { useIsFocused } from "./useIsFocused";
@@ -151,6 +152,7 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
     searchDelay = props.onSearch ? 250 : 0,
     allowSpaces = true,
     insertOnBlur = true,
+    menuParent,
     menuComponent: MenuComponent = "ul",
     menuItemComponent: MenuItemComponent = "li",
     emptyComponent: EmptyComponent,
@@ -173,6 +175,7 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
   const [editor] = useLexicalComposerContext();
   const [queryString, setQueryString] = useState<string | null>(null);
   const [trigger, setTrigger] = useState<string | null>(null);
+  const [triggerRegExp, setTriggerRegExp] = useState<string | null>(null);
   const { results, loading, query } = useMentionLookupService({
     queryString,
     searchDelay,
@@ -260,7 +263,7 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
       closeMenu?: () => void,
     ) => {
       editor.update(() => {
-        if (!trigger) {
+        if (!trigger || !triggerRegExp) {
           return;
         }
         const newMention =
@@ -270,8 +273,10 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
             ? // if the value has spaces, wrap it in the enclosure
               mentionEnclosure + selectedOption.value + mentionEnclosure
             : selectedOption.value;
+
         const mentionNode = $createBeautifulMentionNode(
           trigger,
+          triggerRegExp,
           value,
           selectedOption.data,
         );
@@ -282,7 +287,7 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
         justSelectedAnOption.current = true;
       });
     },
-    [editor, trigger, creatable, mentionEnclosure],
+    [editor, trigger, triggerRegExp, creatable, mentionEnclosure],
   );
 
   const handleSelectMenuItem = useCallback(
@@ -330,10 +335,14 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
             : replaceableString.substring(0, index) +
               replaceableString.substring(index + matchingString.length);
         setTrigger(trigger || null);
+        const triggerRegExp = getTriggerRegExp(triggers, trigger);
+        setTriggerRegExp(triggerRegExp);
+
         if (queryMatch.replaceableString) {
           return queryMatch;
         }
       } else {
+        setTriggerRegExp(null);
         setTrigger(null);
       }
 
@@ -356,7 +365,12 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
       return false;
     }
     const selectionInfo = $getSelectionInfo(triggers, punctuation);
-    if (!trigger || !selectionInfo || !selectionInfo.isTextNode) {
+    if (
+      !trigger ||
+      !triggerRegExp ||
+      !selectionInfo ||
+      !selectionInfo.isTextNode
+    ) {
       return false;
     }
     const node = selectionInfo.node;
@@ -379,6 +393,7 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
     }
     const mentionNode = $createBeautifulMentionNode(
       trigger,
+      triggerRegExp,
       option.value,
       option.data,
     );
@@ -391,7 +406,15 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
       { tag: "history-merge" },
     );
     return true;
-  }, [editor, options, preTriggerChars, punctuation, trigger, triggers]);
+  }, [
+    editor,
+    options,
+    preTriggerChars,
+    punctuation,
+    trigger,
+    triggerRegExp,
+    triggers,
+  ]);
 
   const restoreSelection = useCallback(() => {
     const selection = $getSelection();
@@ -724,7 +747,7 @@ export function BeautifulMentionsPlugin(props: BeautifulMentionsPluginProps) {
                   </MenuItemComponent>
                 ))}
               </MenuComponent>,
-              anchorElementRef.current,
+              menuParent ?? anchorElementRef.current,
             )
           : null;
       }}

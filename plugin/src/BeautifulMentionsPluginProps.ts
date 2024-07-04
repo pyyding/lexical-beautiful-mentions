@@ -191,6 +191,10 @@ interface BeautifulMentionsProps {
 
 type BeautifulMentionsMenuComponentsProps = BeautifulMentionsProps & {
   /**
+   * The element that the menu will be attached to.
+   */
+  menuParent?: HTMLElement;
+  /**
    * The class name to apply to the menu component root element.
    */
   menuAnchorClassName?: string;
@@ -288,6 +292,7 @@ type BeautifulMentionsMenuCommandComponentProps = BeautifulMentionsProps & {
    * item changes.
    */
   onComboboxFocusChange?: (item: BeautifulMentionsComboboxItem | null) => void;
+  menuParent?: never;
   menuAnchorClassName?: never;
   menuComponent?: never;
   menuItemComponent?: never;
